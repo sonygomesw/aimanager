@@ -1,0 +1,458 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== Authentication ====================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auth relations
+  accounts      Account[]
+  sessions      Session[]
+
+  // Artist data
+  artistProfile    ArtistProfile?
+  subscription     Subscription?
+  conversations    Conversation[]
+  projects         Project[]
+  dailyPlans       DailyPlan[]
+  monthlyPlans     MonthlyPlan[]
+  monthlyProgress  MonthlyProgress[]
+  dailyTasks       DailyTask[]
+  annualPlans      AnnualPlan[]
+  statsInputs      StatsInput[]
+  hooks            Hook[]
+  videoIdeas       VideoIdea[]
+  calendarPlans    CalendarPlan[]
+
+  // Addiction features
+  checkIns         DailyCheckIn[]
+  memories         Memory[]
+  streakHistory    StreakHistory[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==================== Artist Profile ====================
+
+model ArtistProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+
+  // Onboarding data
+  artistName      String?
+  genre           String?  // Hip-Hop, Pop, Rock, Electronic, etc.
+  subGenre        String?  // Trap, Lo-fi, Indie Pop, etc.
+  niche           String?  // Specific positioning
+  mainGoal        String?  // Vivre de ma musique, Devenir connu, etc.
+  currentStage    String?  // Débutant, Intermédiaire, Avancé
+  contentStyle    String?  // facecam, faceless - Critical strategic choice
+
+  // Social links
+  spotifyUrl      String?
+  tiktokUrl       String?
+  instagramUrl    String?
+  youtubeUrl      String?
+
+  // AI Analysis
+  archetype       String?  // L'Innovateur, Le Storyteller, etc.
+  strengths       String?  // JSON array of strengths
+  weaknesses      String?  // JSON array of areas to improve
+  positioning     String?  // AI-generated positioning statement
+
+  // Consistency Tracking (ADDICTION SYSTEM)
+  currentStreak   Int      @default(0)  // Days of consecutive posting
+  longestStreak   Int      @default(0)  // All-time best streak
+  lastActiveDate  DateTime?             // Last day they completed tasks
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== Subscription & Billing ====================
+
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+
+  plan            String   // starter, growth, pro, elite
+  status          String   // active, canceled, past_due
+  currentPeriodEnd DateTime
+
+  stripeCustomerId       String?  @unique
+  stripeSubscriptionId   String?  @unique
+  stripePriceId          String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== Plans ====================
+
+model DailyPlan {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime
+
+  tasks       String   // JSON array of tasks
+  completed   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model MonthlyPlan {
+  id          String   @id @default(cuid())
+  userId      String
+  month       Int      // 1-12
+  year        Int
+
+  content     String   // AI-generated plan (markdown/json)
+  goals       String   // JSON array of monthly goals
+  strategies  String   // JSON array of strategies
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month, year])
+}
+
+// ==================== MONTHLY PROGRESS TRACKER (ADDICTION) ====================
+
+model MonthlyProgress {
+  id                String   @id @default(cuid())
+  userId            String
+  month             Int      // 1-12
+  year              Int
+
+  // Music Plan Progress
+  trackReleased     Boolean  @default(false)  // Track released this month?
+  trackName         String?                   // Name of the track
+  trackSpotifyUrl   String?                   // Spotify link
+  tiktoksCreated    Int      @default(0)      // How many TikToks created (goal: 200)
+  tiktoksPosted     Int      @default(0)      // How many TikToks posted
+
+  // Branding Progress
+  brandingTiktoks   Int      @default(0)      // Branding content posted
+
+  // Engagement
+  daysActive        Int      @default(0)      // Days they logged in this month
+  tasksCompleted    Int      @default(0)      // Total tasks completed this month
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month, year])
+}
+
+// ==================== DAILY TASKS (CHECKBOX SATISFACTION) ====================
+
+model DailyTask {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @default(now())
+
+  task        String   // Task description
+  category    String   // music, branding, engagement, creation
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AnnualPlan {
+  id          String   @id @default(cuid())
+  userId      String
+  year        Int
+
+  content     String   // AI-generated annual plan
+  milestones  String   // JSON array of milestones
+  quarters    String   // JSON breakdown by quarter
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year])
+}
+
+// ==================== Content Generation ====================
+
+model Hook {
+  id          String   @id @default(cuid())
+  userId      String
+
+  type        String   // tiktok, instagram, youtube
+  content     String   // The actual hook
+  context     String?  // What it's about
+
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VideoIdea {
+  id          String   @id @default(cuid())
+  userId      String
+
+  title       String
+  description String
+  platform    String   // tiktok, instagram, youtube
+  category    String?  // trending, educational, viral, etc.
+
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== Stats Tracking ====================
+
+model StatsInput {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @default(now())
+
+  // Spotify
+  spotifyListeners    Int?
+  spotifyStreams      Int?
+
+  // TikTok
+  tiktokViews         Int?
+  tiktokFollowers     Int?
+
+  // Instagram
+  instagramFollowers  Int?
+  instagramReach      Int?
+
+  // YouTube
+  youtubeViews        Int?
+  youtubeSubscribers  Int?
+
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== Projects (existing) ====================
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("active") // active, completed, archived
+  priority    String   @default("medium") // low, medium, high
+  deadline    DateTime?
+  category    String?  // Release, Content, Branding, Marketing
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  projectId   String
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ==================== Chat / Conversations ====================
+
+model Conversation {
+  id        String   @id @default(cuid())
+  title     String   @default("Nouvelle conversation")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  role           String       // user, assistant, system
+  content        String
+  createdAt      DateTime     @default(now())
+  conversationId String
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+// ==================== Calendar Plan (30-Day Plan) ====================
+
+model CalendarPlan {
+  id          String   @id @default(cuid())
+  userId      String
+  month       DateTime // First day of the month
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  days        CalendarDay[]
+}
+
+model CalendarDay {
+  id            String   @id @default(cuid())
+  calendarPlanId String
+  dayNumber     Int      // 1-31
+  date          DateTime
+
+  calendarPlan  CalendarPlan @relation(fields: [calendarPlanId], references: [id], onDelete: Cascade)
+  tasks         CalendarTask[]
+}
+
+model CalendarTask {
+  id            String   @id @default(cuid())
+  calendarDayId String
+  title         String
+  category      String   // music, branding, engagement, creation
+  completed     Boolean  @default(false)
+  completedAt   DateTime?
+
+  calendarDay   CalendarDay @relation(fields: [calendarDayId], references: [id], onDelete: Cascade)
+}
+
+// ==================== Daily Check-in (ADDICTION) ====================
+
+model DailyCheckIn {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @default(now())
+
+  // Mood & Energy
+  mood        String   // great, good, okay, tired, stressed
+  energy      Int      // 1-5
+
+  // Quick status
+  workingOn   String?  // What are you working on today?
+  blockers    String?  // Any blockers?
+  wins        String?  // Any wins to celebrate?
+
+  // Streak tracking
+  streakDay   Int      @default(1)
+
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+// ==================== Memory System (AI remembers everything) ====================
+
+model Memory {
+  id          String   @id @default(cuid())
+  userId      String
+
+  // Memory type
+  type        String   // decision, preference, goal, milestone, insight, fact
+  category    String   // career, branding, music, personal, business
+
+  // Content
+  key         String   // Short identifier
+  value       String   // The actual memory content
+  importance  Int      @default(5) // 1-10
+
+  // Context
+  source      String?  // conversation, checkin, task, etc.
+  sourceId    String?  // ID of the source
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([userId, category])
+}
+
+// ==================== Streak System ====================
+
+model StreakHistory {
+  id          String   @id @default(cuid())
+  userId      String
+
+  startDate   DateTime
+  endDate     DateTime?
+  length      Int      @default(0)
+  reason      String?  // Why the streak ended
+
+  // Level achieved
+  level       String   @default("bronze") // bronze, silver, gold, platinum
+
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
