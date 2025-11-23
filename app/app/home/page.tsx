@@ -8,6 +8,7 @@ import {
   Target, Plus, BarChart3
 } from 'lucide-react'
 import { Sidebar } from '@/components/Sidebar'
+import { Tooltip } from '@/components/Tooltip'
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true)
@@ -111,9 +112,19 @@ export default function HomePage() {
         setMonthlyProgress(data.progress)
         setShowTikTokModal(false)
         setTiktokCount('')
+
+        // Show success toast
+        const event = new CustomEvent('show-toast', {
+          detail: { message: `${count} TikTok${count > 1 ? 's' : ''} added! Keep going 🔥`, type: 'success' }
+        })
+        window.dispatchEvent(event)
       }
     } catch (error) {
       console.error('Error logging TikToks:', error)
+      const event = new CustomEvent('show-toast', {
+        detail: { message: 'Failed to log TikToks. Please try again.', type: 'error' }
+      })
+      window.dispatchEvent(event)
     }
   }
 
@@ -137,9 +148,19 @@ export default function HomePage() {
         setShowTrackModal(false)
         setTrackName('')
         setTrackUrl('')
+
+        // Show success toast
+        const event = new CustomEvent('show-toast', {
+          detail: { message: `Track "${trackName}" marked as released! 🎵`, type: 'success' }
+        })
+        window.dispatchEvent(event)
       }
     } catch (error) {
       console.error('Error marking track released:', error)
+      const event = new CustomEvent('show-toast', {
+        detail: { message: 'Failed to mark track. Please try again.', type: 'error' }
+      })
+      window.dispatchEvent(event)
     }
   }
 
@@ -168,7 +189,7 @@ export default function HomePage() {
               </div>
             </div>
             <Link
-              href="/"
+              href="/app/chat"
               className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium"
             >
               <MessageSquare className="w-4 h-4" />
@@ -191,7 +212,10 @@ export default function HomePage() {
                   <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Current</span>
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">{profile?.currentStreak || 0}</div>
-                <div className="text-sm text-gray-500">Day streak</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-gray-500">Day streak</div>
+                  <Tooltip content="Consistency is everything! Post daily to build momentum and train the algorithm. Never break your streak." />
+                </div>
               </div>
 
               {/* Best Streak */}
@@ -269,7 +293,10 @@ export default function HomePage() {
                         <Video className="w-5 h-5 text-indigo-600" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">TikToks Created</div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-medium text-gray-900">TikToks Created</div>
+                          <Tooltip content="Why 200? Each TikTok is a free lottery ticket for virality. More content = more chances to blow up. Batch filming makes this sustainable." />
+                        </div>
                         <div className="text-xs text-gray-500">Goal: 200 per month</div>
                       </div>
                     </div>

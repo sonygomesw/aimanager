@@ -18,12 +18,12 @@ export function Sidebar({ onNewChat }: SidebarProps) {
   const pathname = usePathname()
 
   const navItems = [
-    { href: '/app/home', icon: Home, label: 'Dashboard' },
-    { href: '/', icon: MessageSquare, label: 'Chat Manager' },
-    { href: '/app/blueprint', icon: Target, label: 'Career Blueprint' },
-    { href: '/app/branding', icon: Palette, label: 'Branding' },
-    { href: '/app/tasks', icon: ListTodo, label: 'Tasks' },
-    { href: '/app/revenue', icon: DollarSign, label: 'Revenue' },
+    { href: '/app/home', icon: Home, label: 'Home' },
+    { href: '/app/chat', icon: MessageSquare, label: 'Ask Manager' },
+    { href: '/app/blueprint', icon: Target, label: 'My Plan' },
+    { href: '/app/branding', icon: Palette, label: 'Brand Guide' },
+    { href: '/app/tasks', icon: ListTodo, label: 'To-Do' },
+    { href: '/app/revenue', icon: DollarSign, label: 'Earnings' },
     { href: '/app/profile', icon: User, label: 'Profile' },
     { href: '/app/settings', icon: Settings, label: 'Settings' },
   ]
