@@ -81,7 +81,7 @@ export default function HomePage() {
         const streakRes = await fetch('/api/streak')
         if (streakRes.ok) {
           const data = await streakRes.json()
-          setProfile(prev => prev ? { ...prev, ...data } : null)
+          setProfile((prev: any) => prev ? { ...prev, ...data } : null)
         }
       }
     } catch (error) {

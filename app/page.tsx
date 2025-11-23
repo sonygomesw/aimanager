@@ -71,7 +71,7 @@ export default function ChatPage() {
         }
       }
     } catch (error) {
-      console.error('Erreur:', error)
+      console.error('Error:', error)
       setMessages(prev => [
         ...prev,
         { role: 'assistant', content: 'Sorry, an error occurred. Please try again.' }

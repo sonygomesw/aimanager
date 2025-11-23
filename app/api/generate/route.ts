@@ -138,13 +138,26 @@ export async function POST(req: NextRequest) {
       case 'analyzeProfile':
         if (!artistProfile) {
           return NextResponse.json(
-            { error: 'Profil artiste non trouvé' },
+            { error: 'Artist profile not found' },
             { status: 404 }
           )
         }
-        result = await analyzeArtistProfile(artistProfile)
+        result = await analyzeArtistProfile({
+          artistName: artistProfile.artistName || undefined,
+          genre: artistProfile.genre || undefined,
+          subGenre: artistProfile.subGenre || undefined,
+          niche: artistProfile.niche || undefined,
+          mainGoal: artistProfile.mainGoal || undefined,
+          currentStage: artistProfile.currentStage || undefined,
+          spotifyUrl: artistProfile.spotifyUrl || undefined,
+          tiktokUrl: artistProfile.tiktokUrl || undefined,
+          instagramUrl: artistProfile.instagramUrl || undefined,
+          youtubeUrl: artistProfile.youtubeUrl || undefined,
+          currentStreak: artistProfile.currentStreak,
+          longestStreak: artistProfile.longestStreak
+        })
 
-        // Mettre à jour le profil avec l'analyse
+        // Update profile with analysis
         await prisma.artistProfile.update({
           where: { userId },
           data: {
@@ -158,10 +171,10 @@ export async function POST(req: NextRequest) {
 
       case '30DayPlan':
         result = await generate30DayPlan({
-          artistName: artistProfile?.artistName,
-          genre: artistProfile?.genre,
-          currentStage: artistProfile?.currentStage,
-          mainGoal: artistProfile?.mainGoal
+          artistName: artistProfile?.artistName || undefined,
+          genre: artistProfile?.genre || undefined,
+          currentStage: artistProfile?.currentStage || undefined,
+          mainGoal: artistProfile?.mainGoal || undefined
         })
 
         // Sauvegarder le plan mensuel
@@ -192,10 +205,10 @@ export async function POST(req: NextRequest) {
 
       case 'annualPlan':
         result = await generateAnnualPlan({
-          artistName: artistProfile?.artistName,
-          genre: artistProfile?.genre,
-          currentStage: artistProfile?.currentStage,
-          mainGoal: artistProfile?.mainGoal
+          artistName: artistProfile?.artistName || undefined,
+          genre: artistProfile?.genre || undefined,
+          currentStage: artistProfile?.currentStage || undefined,
+          mainGoal: artistProfile?.mainGoal || undefined
         })
 
         // Sauvegarder le plan annuel
@@ -224,8 +237,8 @@ export async function POST(req: NextRequest) {
 
       case 'dailyChecklist':
         result = await generateDailyChecklist({
-          currentStage: artistProfile?.currentStage,
-          mainGoal: artistProfile?.mainGoal
+          currentStage: artistProfile?.currentStage || undefined,
+          mainGoal: artistProfile?.mainGoal || undefined
         })
 
         // Sauvegarder la checklist du jour
@@ -271,9 +284,9 @@ export async function POST(req: NextRequest) {
 
       case 'videoIdeas':
         result = await generateVideoIdeas({
-          genre: artistProfile?.genre,
-          niche: artistProfile?.niche,
-          currentStage: artistProfile?.currentStage
+          genre: artistProfile?.genre || undefined,
+          niche: artistProfile?.niche || undefined,
+          currentStage: artistProfile?.currentStage || undefined
         })
 
         // Sauvegarder les idées vidéo
@@ -301,8 +314,8 @@ export async function POST(req: NextRequest) {
         })
 
         result = await generateSpotifyStrategy({
-          genre: artistProfile?.genre,
-          currentStage: artistProfile?.currentStage,
+          genre: artistProfile?.genre || undefined,
+          currentStage: artistProfile?.currentStage || undefined,
           spotifyListeners: stats?.spotifyListeners || 0
         })
         break

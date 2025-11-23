@@ -1,21 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CheckInProvider } from "@/lib/CheckInProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "AI Manager - Assistant IA pour Artistes",
-  description: "Votre assistant IA pour vous organiser, gérer vos projets artistiques et développer votre carrière",
+  title: "AI Manager - AI Assistant for Artists",
+  description: "Your AI assistant to organize, manage your artistic projects and develop your career",
 };
 
 export default function RootLayout({
@@ -24,10 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-gray-900`}
-      >
+    <html lang="en">
+      <body className="antialiased bg-white text-gray-900">
         <CheckInProvider>
           {children}
         </CheckInProvider>
