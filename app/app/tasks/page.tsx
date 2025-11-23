@@ -95,7 +95,7 @@ export default function TasksPage() {
       label: 'This Week',
       icon: Calendar,
       description: 'Daily actions for consistency',
-      examples: ['3 micro-contents', '1 studio session', '1 branding post', '1 DJ/playlist contact']
+      examples: ['3 micro-contents', '1 studio session', '1 branding post', '1 artist/playlist contact']
     },
     {
       id: 'monthly',

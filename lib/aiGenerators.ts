@@ -197,7 +197,7 @@ PROFIL ARTISTE:
 GÉNÈRE UN ${config.title.toUpperCase()} avec focus sur: ${config.focus}
 
 PRINCIPES CLÉS À INTÉGRER:
-1. Système des 3 comptes TikTok (DJ Sets, Face Cam/BTS, Remixes/Trends)
+1. Système des 3 comptes TikTok (Music Sets, Face Cam/BTS, Remixes/Trends)
 2. Batching de contenu (1 session = 1 mois de contenu, 200 TikToks par track)
 3. Chaque vidéo = un ticket de loterie gratuit
 4. Les clubs bookent la VISIBILITÉ, pas le talent

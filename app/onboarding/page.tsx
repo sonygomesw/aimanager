@@ -170,7 +170,7 @@ export default function OnboardingPage() {
                   type="text"
                   value={formData.artistName}
                   onChange={(e) => updateField('artistName', e.target.value)}
-                  placeholder="e.g. DJ Pulse"
+                  placeholder="e.g. Echo Wave"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
               </div>
